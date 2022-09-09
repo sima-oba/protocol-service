@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: protocol
+  namespace: sima
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: protocol-rest
+  template:
+    metadata:
+      labels:
+        app: protocol-rest
+    spec:
+      containers:
+      - name: protocol-rest
+        image: $REGISTRY-docker.pkg.dev/$PROJECT_ID/sima/protocol:$IMAGE_TAG
+        imagePullPolicy: Always
+        args: ["start-gunicorn-server", "--workers", "8"]
+        ports:
+        - name: rest
+          containerPort: 5000
+        envFrom:
+          - secretRef:
+              name: protocol-secret
+          - configMapRef:
+              name: protocol-conf
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+      - name: protocol-kafka
+        image: $REGISTRY-docker.pkg.dev/$PROJECT_ID/sima/protocol:$IMAGE_TAG
+        imagePullPolicy: Always
+        args: ["start-kafka-consumer"]
+        envFrom:
+          - secretRef:
+              name: protocol-secret
+          - configMapRef:
+              name: protocol-conf
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "50m"

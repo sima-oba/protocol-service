@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: protocol-service
+spec:
+  type: ClusterIP
+  selector:
+    app: protocol-rest
+  ports:
+  - name: rest
+    port: 5000
+    targetPort: 5000
